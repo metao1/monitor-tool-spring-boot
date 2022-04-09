@@ -1,0 +1,8 @@
+spring:
+  webflux:
+    static-path-pattern: /public/** 
+
+logging:
+  level:
+    root: INFO
+
