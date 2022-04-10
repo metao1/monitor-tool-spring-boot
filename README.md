@@ -23,4 +23,4 @@
 
     http://localhost:8080/index.html
 
-[screenshot](https://gitlab.com/metao/monitor-tool-spring-boot/-/raw/main/scsch.png?inline=false)
+![screenshot](https://gitlab.com/metao/monitor-tool-spring-boot/-/raw/main/scsch.png?inline=false)
