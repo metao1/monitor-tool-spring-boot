@@ -1,7 +1,17 @@
-# Read Me First
-The following was discovered as part of building this project:
+# Monitoring tool with spring-boot
 
-* The original package name 'com.metao.monito.monitor-tool-spring-boot' is invalid and this project uses 'com.metao.monito.monitortoolspringboot' instead.
+    configuration is avalable under resources folder in config.yml file
+    
+    example below:
+    
+    monitor:  
+        interval: 1000 #ms // every 1 second by default
+        url: "http://httpstat.us/200" # the remote host to monitor
+        window_sizes:
+            - 10 #second
+            - 60 #seconds
+            - 3600 #seconds 
+
 
 # Getting Started
     mvn clean install
