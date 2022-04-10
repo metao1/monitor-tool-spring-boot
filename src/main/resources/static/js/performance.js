@@ -61,9 +61,9 @@ function Diagram(id, title, seriesNames, yAxisMax) {
     };
 }
 
-var diagram1 = new Diagram('chart1', 'every 10 seconds', ['every 10 seconds', 'timestamp'], 200);
-var diagram2 = new Diagram('chart2', 'every minute', ['every minute', 'timestamp'], 200);
-var diagram3 = new Diagram('chart3', 'every hour', ['every minute', 'timestamp'], 200);
+var diagram1 = new Diagram('chart1', 'every 10 seconds', ['every 10 seconds', 'timestamp'], 400);
+var diagram2 = new Diagram('chart2', 'every minute', ['every minute', 'timestamp'], 400);
+var diagram3 = new Diagram('chart3', 'every hour', ['every minute', 'timestamp'], 400);
 
 var eventSource1 = new EventSource('http://localhost:8080/average?window_size=10');
 var eventSource2 = new EventSource('http://localhost:8080/average?window_size=60');
@@ -72,7 +72,6 @@ var eventSource3 = new EventSource('http://localhost:8080/average?window_size=36
 eventSource1.onmessage = function (message) {
 
     var performance = JSON.parse(message.data);
-    console.log(performance);
     var time = performance.timestamp;
 
     diagram1.addPoints([
