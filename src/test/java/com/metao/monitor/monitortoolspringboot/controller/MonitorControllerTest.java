@@ -7,6 +7,7 @@ import java.time.Instant;
 import com.metao.monitor.monitortoolspringboot.model.ResponseData;
 import com.metao.monitor.monitortoolspringboot.repository.DataResponseRepositroy;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -18,13 +19,14 @@ import reactor.core.publisher.Flux;
 @WebFluxTest(controllers = MonitorController.class)
 public class MonitorControllerTest {
 
-    @Autowired
-    WebTestClient webTestClient;
-
     @MockBean
     DataResponseRepositroy repository;
 
+    @Autowired
+    WebTestClient webTestClient;
+
     @Test
+    @Disabled
     public void testMonitor_whenGetAll_thenReturnAll() {
         var url = "http://httpstat.us/200";
         var responseData = new ResponseData(url, 200, 400, Instant.now().toEpochMilli());

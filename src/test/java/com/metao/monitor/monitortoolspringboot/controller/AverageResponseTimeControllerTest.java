@@ -52,7 +52,7 @@ public class AverageResponseTimeControllerTest {
                 .then((answer) -> new AverageViewModelDTO(
                         averageViewModel.getWindowSize(),
                         averageViewModel.getMovingAverageResponseTime(),
-                        averageViewModel.getId()));
+                        averageViewModel.getTimestamp()));
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder.path("/average").queryParam("window_size", windowSize).build())

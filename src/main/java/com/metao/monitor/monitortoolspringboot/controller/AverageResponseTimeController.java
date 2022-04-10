@@ -8,7 +8,6 @@ import com.metao.monitor.monitortoolspringboot.model.DataTransferObject.AverageV
 import com.metao.monitor.monitortoolspringboot.repository.AverageViewRepository;
 import com.metao.monitor.monitortoolspringboot.service.impl.AverageViewModelConverter;
 
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +25,7 @@ public class AverageResponseTimeController {
     private final AverageViewRepository repository;
     private final AverageViewModelConverter converter;
 
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping
     @ResponseBody
     public Flux<AverageViewModelDTO> getAverage(@RequestParam("window_size") @NotNull int windowSize) {
         return repository
