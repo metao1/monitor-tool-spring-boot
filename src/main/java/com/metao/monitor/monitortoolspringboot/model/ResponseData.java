@@ -7,7 +7,6 @@ import javax.persistence.GenerationType;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -16,7 +15,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-
 @ToString
 @Getter
 @EqualsAndHashCode
@@ -24,7 +22,7 @@ import lombok.ToString;
 @Table(value = "response_data")
 public class ResponseData implements Serializable {
 
-    @Id    
+    @Id
     @Column("id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
@@ -39,14 +37,10 @@ public class ResponseData implements Serializable {
     long responseTime;
 
     @Column("created_at")
-    @CreationTimestamp    
+    @CreationTimestamp
     private Long createdAt;
-    
-    @Version
-    @Column("version")
-    private Long version;
 
-    public ResponseData(String url, int status, long responseTime, long createdAt) {        
+    public ResponseData(String url, int status, long responseTime, long createdAt) {
         this.url = url;
         this.status = status;
         this.createdAt = createdAt;

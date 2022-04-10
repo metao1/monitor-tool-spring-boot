@@ -14,7 +14,7 @@ public class MovingAverageData {
     private final int windowSize;
 
     public MovingAverageData(int windowSize) {
-        assert windowSize < 0 : "Window size must be greater than 0";
+        assert windowSize > 0 : "Window size must be greater than 0";
         this.windowSize = windowSize;
     }
 
@@ -35,7 +35,7 @@ public class MovingAverageData {
     }
 
     public double getAverage(int windowSum) {
-        assert windowSum < 0 : "Window size must be greater than 0";
+        assert windowSum > 0 : "Window size must be greater than 0";
         if(window.isEmpty()) {
             return 0.0;
         }

@@ -1,15 +1,16 @@
 package com.metao.monitor.monitortoolspringboot;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
-import java.time.Instant;
+import java.time.Duration;
 
 import com.metao.monitor.monitortoolspringboot.model.ResponseData;
 import com.metao.monitor.monitortoolspringboot.repository.DataResponseRepositroy;
@@ -19,10 +20,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.ActiveProfiles;
 
 import lombok.SneakyThrows;
 import reactor.test.StepVerifier;
 
+@ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class RemoteHostMonitorIntegrationTest {
 
@@ -30,44 +33,37 @@ public class RemoteHostMonitorIntegrationTest {
     private DataResponseService remoteHostMonitor;
 
     @SpyBean
-    DataResponseRepositroy repository;
-
-    @Test
-    void testResponseData_whenAreEqual_thenIsOk() {
-        var responseData1 = new ResponseData("url1", 200, 10, Instant.now().toEpochMilli());
-        var responseData2 = new ResponseData("url1", 200, 10, Instant.now().toEpochMilli());
-        assertEquals(responseData1, responseData2);
-    }
-
-    @Test
-    void testResponseData_whenAreNotEqual_thenIsNotOk() {
-        var responseData1 = new ResponseData("url2", 200, 10, Instant.now().toEpochMilli());
-        var responseData2 = new ResponseData("url1", 200, 10, Instant.now().toEpochMilli());
-        assertNotEquals(responseData1, responseData2);
-        assertNotEquals(new ResponseData(null, 200,10, Instant.now().toEpochMilli()),
-                new ResponseData("url1", 200, 10, Instant.now().toEpochMilli()));
-    }
+    private DataResponseRepositroy repository;
 
     @Test
     @SneakyThrows
     void testMonitor_whenRemoteHostSends301_thenIsOk() {
         var url = "https://google.com";
-        var responseData = new ResponseData(url, 301, 10, Instant.now().toEpochMilli());
         StepVerifier
                 .create(remoteHostMonitor.monitor(url))
-                .expectNext(responseData)
+                .consumeNextWith(responseData -> {
+                    assertNotNull(responseData);
+                    assertEquals(301, responseData.getStatus());
+                    assertEquals(url, responseData.getUrl());
+                    assertThat(responseData.getResponseTime()).isGreaterThan(0);
+                })
                 .verifyComplete();
+                verify(repository, times(1)).save(any(ResponseData.class));
     }
 
     @Test
     @SneakyThrows
     void testMonitor_whenRemoteHostSends200_thenIsOk() {
         var url = "http://httpstat.us/200";
-        var responseData = new ResponseData(url, 200, 10, Instant.now().toEpochMilli());
 
         StepVerifier
                 .create(remoteHostMonitor.monitor(url))
-                .expectNext(responseData)
+                .consumeNextWith(responseData -> {
+                    assertNotNull(responseData);
+                    assertEquals(200, responseData.getStatus());
+                    assertEquals(url, responseData.getUrl());
+                    assertThat(responseData.getResponseTime()).isGreaterThan(0);
+                })
                 .verifyComplete();
     }
 
@@ -85,14 +81,9 @@ public class RemoteHostMonitorIntegrationTest {
     @Test
     @SneakyThrows
     void testMonitor_whenRemoteHostSends200_thenSaveIntoRepository() {
-        var url = "http://httpstat.us/200";
-        var responseData = new ResponseData(url, 200, 10, Instant.now().toEpochMilli());
-
+        var url = "http://localhost:8080/monitor/all";
         StepVerifier
                 .create(remoteHostMonitor.monitor(url))
-                .expectNext(responseData)
-                .verifyComplete();
-
-        verify(repository, times(1)).save(responseData);
+                .expectTimeout(Duration.ofMillis(10000));
     }
 }

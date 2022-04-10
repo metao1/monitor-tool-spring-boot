@@ -16,7 +16,6 @@ import com.metao.monitor.monitortoolspringboot.service.URLValidator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -50,7 +49,7 @@ public class DataResponseService extends RemoteHostMonitor<Mono<ResponseData>> {
                 .retrieve()
                 .toBodilessEntity()
                 .elapsed() // get the time it took to get the response
-                .map(it -> buildResponseData(url, it.getT1(), it.getT2()))
+                .map(it -> buildResponseData(url, it.getT1(), it.getT2().getStatusCode().value()))
                 .filter(Objects::nonNull)
                 .flatMap(this::saveResponse)
                 .timeout(Duration.ofMillis(TIMEOUT))
@@ -58,10 +57,13 @@ public class DataResponseService extends RemoteHostMonitor<Mono<ResponseData>> {
                 .doOnSuccess(reportSuccess());
     }
 
-    protected ResponseData buildResponseData(String url, final long responseTime, ResponseEntity<Void> responseEntity) {
+    protected ResponseData buildResponseData(@NotNull String url, @NotNull final long responseTime, @NotNull int statusCode) {
         final ResponseData responseData;
         try {
-            responseData = new ResponseData(url, responseEntity.getStatusCodeValue(), responseTime, Instant.now().toEpochMilli());
+            assert url != null;
+            assert responseTime >= 0;
+            assert statusCode >= 0;        
+            responseData = new ResponseData(url, statusCode, responseTime, Instant.now().toEpochMilli());
         } catch (NullPointerException e) {
             log.error("Error while building response data for url {}", url, e);
             return null;
@@ -75,7 +77,7 @@ public class DataResponseService extends RemoteHostMonitor<Mono<ResponseData>> {
 
     protected Consumer<ResponseData> reportSuccess() {
         return data -> {
-            log.debug("data saved: {}", data);
+            log.info("data saved: {}", data);
         };
     }
 

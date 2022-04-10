@@ -4,9 +4,7 @@ CREATE TABLE `RESPONSE_DATA`
     `url` VARCHAR2 NOT NULL,
     `status` INTEGER NOT NULL,
     `response_time` BIGINT NOT NULL,
-    `created_at` BIGINT NOT NULL,
-    `updated_at` BIGINT,
-    `version` INTEGER
+    `created_at` BIGINT NOT NULL    
 );
 
 CREATE TABLE `AVERAGE_VIEW_MODEL`

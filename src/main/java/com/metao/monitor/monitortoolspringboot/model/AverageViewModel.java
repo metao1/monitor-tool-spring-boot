@@ -16,9 +16,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @Table(value = "average_view_model")
 public class AverageViewModel implements Serializable {
- 
+
     @Column("id")
-    private Long id;
+    private Long id; // primary key timesatmp
 
     @Column("window_size")
     private int windowSize;
