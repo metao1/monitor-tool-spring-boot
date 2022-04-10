@@ -1,6 +1,5 @@
 package com.metao.monitor.monitortoolspringboot.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,6 +10,8 @@ import java.util.stream.Stream;
 
 import com.metao.monitor.monitortoolspringboot.config.MovingAverageConfig;
 import com.metao.monitor.monitortoolspringboot.model.ResponseData;
+import com.metao.monitor.monitortoolspringboot.repository.AverageViewRepository;
+import com.metao.monitor.monitortoolspringboot.repository.DataResponseRepositroy;
 import com.metao.monitor.monitortoolspringboot.repository.MovingAverageRepository;
 import com.metao.monitor.monitortoolspringboot.service.impl.MovingAverageCalculatorService;
 
@@ -32,43 +33,35 @@ public class AverageDataCalculatorServiceTest {
     @Mock
     MovingAverageConfig config;
 
+    @Mock
+    DataResponseRepositroy dataResponseRepository;
+    
+    @Spy
+    AverageViewRepository averageViewRepository;
+
     @InjectMocks
     MovingAverageCalculatorService averageDataCalculatorService;
 
     @Test
     void testUpdateAverage() {
         var windowSizes = Stream.of(10000, 20000, 40000).toList();
-        when(config.getWindowSizes()).thenReturn(windowSizes);
+        var url = "htp://example.com";
 
         Flux.range(1, 3600)
-                .map(i -> new ResponseData(1 + "", 200, supplyNumber().get(), Instant.now().toEpochMilli()))
-                .map(ResponseData::getResponseTime)
-                .reduce(0d, (a, b) -> a + b)
-                .subscribe(sum -> averageDataCalculatorService.updateSum(sum, windowSizes.get(0)));
+                .map(i -> new ResponseData(url, 200, supplyNumber().get(), Instant.now().toEpochMilli()))
+                .subscribe(dataResponseRepository::save);
 
-        verify(averageRepository, times(3600)).existsById(10000);
-        verify(averageRepository, times(3600)).existsById(20000);
-        verify(averageRepository, times(3600)).existsById(40000);
+        var timestamp = Instant.now().getEpochSecond();
 
-        assertEquals(7.2, averageDataCalculatorService.getAverage(10000));
-        assertEquals(3.6, averageDataCalculatorService.getAverage(20000));
-        assertEquals(1.8, averageDataCalculatorService.getAverage(40000));
-    }
+        for (int windowSize : windowSizes) {
+            when(dataResponseRepository.findByUrl(url, windowSize, 0))
+                    .thenReturn(Flux.just(new ResponseData(url, 200, supplyNumber().get(), timestamp)));
+            averageDataCalculatorService.calculateMovingAverageForWindowSize(windowSize, url);
+        }
 
-    @Test
-    void testGetAverage_thenReturnFromCache() {
-        var windowSizes = Stream.of(10).toList();
-        when(config.getWindowSizes()).thenReturn(windowSizes);
-        Flux.range(1, 10) // 9 times in total
-                .map(i -> new ResponseData(1 + "", 200, supplyNumber().get(), Instant.now().toEpochMilli()))
-                .map(ResponseData::getResponseTime)
-                .reduce(0d, (a, b) -> a + b)
-                .subscribe(sum -> averageDataCalculatorService.updateSum(sum, windowSizes.get(0)));
-
-        assertEquals(20d, averageDataCalculatorService.getAverage(10));
-
-        // findById is called 9 times, plus 2 times for average in this test
-        verify(averageRepository, times(11)).existsById(10);
+        verify(averageRepository, times(1)).existsById(10000);
+        verify(averageRepository, times(1)).existsById(20000);
+        verify(averageRepository, times(1)).existsById(40000);
     }
 
     private static Supplier<Long> supplyNumber() {

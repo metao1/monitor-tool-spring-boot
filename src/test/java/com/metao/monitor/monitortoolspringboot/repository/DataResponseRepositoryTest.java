@@ -40,7 +40,7 @@ public class DataResponseRepositoryTest {
                                 .thenMany(this.repository.findByUrl("%httpstat%", 10, 0))
                                 .log()
                                 .as(StepVerifier::create)
-                                .expectNextCount(100)
+                                .expectNextCount(10)
                                 .verifyComplete();
         }
 

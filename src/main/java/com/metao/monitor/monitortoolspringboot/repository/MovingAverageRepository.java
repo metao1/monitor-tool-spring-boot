@@ -20,6 +20,10 @@ public class MovingAverageRepository {
         movingAverageMap.put(windowSize, movingAverage);
     }
 
+    public void deleteById(Integer windowSize) {
+        movingAverageMap.remove(windowSize);
+    }
+
     public MovingAverageData findById(Integer windowSize) {
         return movingAverageMap.get(windowSize);
     }
