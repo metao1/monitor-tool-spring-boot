@@ -35,7 +35,7 @@ public class AverageDataCalculatorServiceTest {
 
     @Mock
     DataResponseRepositroy dataResponseRepository;
-    
+
     @Spy
     AverageViewRepository averageViewRepository;
 

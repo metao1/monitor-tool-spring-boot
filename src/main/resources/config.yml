@@ -1,6 +1,6 @@
 monitor:  
   interval: 1000 #ms // every 10 seconds by default
-  url: "http://google.com"
+  url: "http://digikala.com"
   window_sizes:
     - 10 #second
     - 60 #seconds

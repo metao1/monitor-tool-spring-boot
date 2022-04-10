@@ -37,15 +37,15 @@ public class MovingAverageCalculatorService implements MovingAverageCalculator {
     }
 
     @Override
-    public double updateAverage(double average, int windowSize) {
+    public void updateAverage(double average, int windowSize) {
         final MovingAverageData movingAverage;
         if (movingAverageRepository.existsById(windowSize)) {
             movingAverage = movingAverageRepository.findById(windowSize);
         } else {
             movingAverage = new MovingAverageData(windowSize);
         }
-        movingAverage.updateAverage(average);        
-        return movingAverage.getAverage();
+        movingAverage.updateAverage(average);
+        movingAverageRepository.save(windowSize, movingAverage);
     }
 
     public Mono<AverageViewModel> calculateMovingAverageForWindowSize(int windowSize, String url) {
@@ -54,13 +54,11 @@ public class MovingAverageCalculatorService implements MovingAverageCalculator {
                 .map(ResponseData::getResponseTime) // get response times
                 .reduce(0d, (a, b) -> a + b) // sum response times
                 .map(sum -> sum / windowSize) // calculate average
-                .map(average -> updateAverage(average, windowSize)) // update moving average
-                .map(average -> new AverageViewModel(Instant.now().toEpochMilli(), windowSize, average)) // create view model
-                .flatMap(averageViewModel -> {
+                .flatMap(average -> {
+                    var averageViewModel = new AverageViewModel(Instant.now().toEpochMilli(), windowSize, average); // create average view model
                     try {
-                        var movingAverageData = new MovingAverageData(windowSize);
+                        updateAverage(average, windowSize);// update average                        
                         increaseOffset(windowSize); // increase offset
-                        movingAverageRepository.save(windowSize, movingAverageData); // save moving average
                         return averageViewRepository.save(averageViewModel); // save view model
                     } catch (Exception e) {
                         log.error("Error saving view model", e);
@@ -68,7 +66,6 @@ public class MovingAverageCalculatorService implements MovingAverageCalculator {
                     }
                     return Mono.empty();
                 });
-
     }
 
     private int getOffset(int windowSize) {
