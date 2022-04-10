@@ -48,8 +48,8 @@ public class MovingAverageCalculatorService implements MovingAverageCalculator {
         movingAverageRepository.save(windowSize, movingAverage);
     }
 
-    public Mono<AverageViewModel> calculateMovingAverageForWindowSize(int windowSize, String url) {
-        return dataResponseRepository.findByUrl(url, windowSize, getOffset(windowSize)) // query response times for the given url
+    public Mono<AverageViewModel> calculateMovingAverageForWindowSize(int windowSize, int interval, String url) {
+        return dataResponseRepository.findByUrl(url, windowSize + getOffset(windowSize), getOffset(windowSize)) // query response times for the given url
                 .filter(Objects::nonNull) // filter out null response times
                 .map(ResponseData::getResponseTime) // get response times
                 .reduce(0d, (a, b) -> a + b) // sum response times
@@ -58,7 +58,7 @@ public class MovingAverageCalculatorService implements MovingAverageCalculator {
                     var averageViewModel = new AverageViewModel(Instant.now().toEpochMilli(), windowSize, average); // create average view model
                     try {
                         updateAverage(average, windowSize);// update average                        
-                        increaseOffset(windowSize); // increase offset
+                        increaseOffset(windowSize, interval); // increase offset
                         return averageViewRepository.save(averageViewModel); // save view model
                     } catch (Exception e) {
                         log.error("Error saving view model", e);
@@ -78,12 +78,12 @@ public class MovingAverageCalculatorService implements MovingAverageCalculator {
         return 0;
     }
 
-    private void increaseOffset(int windowSize) {
-        if (windowSize == 0) {
+    private void increaseOffset(int windowSize, int interval) {
+        if (windowSize == 0 || interval == 0) {
             return;
         }
         if (movingAverageRepository.existsById(windowSize)) {
-            movingAverageRepository.findById(windowSize).increaseOffset();
+            movingAverageRepository.findById(windowSize).increaseOffset(windowSize * 1000 / interval);
         }
     }
 

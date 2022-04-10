@@ -33,13 +33,4 @@ public class AverageResponseTimeController {
                 .filter(Objects::nonNull)
                 .map(averageData -> converter.toDto(averageData));
     }
-
-    @GetMapping("/all")
-    @ResponseBody
-    public Flux<AverageViewModelDTO> getAllAverage() {
-        return repository
-                .findAll()
-                .filter(Objects::nonNull)
-                .map(averageData -> converter.toDto(averageData));
-    }
 }

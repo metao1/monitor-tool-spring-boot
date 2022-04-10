@@ -52,7 +52,7 @@ public class MovingAverageCalculatorScheduler {
     private Mono<AverageViewModel> calculateMovingAverageForWindowSize(int windowSize) {
         assert config != null;
         assert windowSize > 0 : "window size must be greater than 0";
-        return movingAverageCalculatorService.calculateMovingAverageForWindowSize(windowSize, config.getUrl());
+        return movingAverageCalculatorService.calculateMovingAverageForWindowSize(windowSize, config.getInterval(), config.getUrl());
 
     }
 

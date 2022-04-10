@@ -17,8 +17,8 @@ public class MovingAverageData {
         this.windowSize = windowSize;
     }
 
-    public void increaseOffset() {
-        offset.incrementAndGet();
+    public void increaseOffset(int delta) {
+        offset.addAndGet(delta);
     }
 
     public void decrementOffset() {

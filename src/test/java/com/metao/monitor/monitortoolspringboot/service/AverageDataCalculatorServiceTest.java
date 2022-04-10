@@ -56,7 +56,7 @@ public class AverageDataCalculatorServiceTest {
         for (int windowSize : windowSizes) {
             when(dataResponseRepository.findByUrl(url, windowSize, 0))
                     .thenReturn(Flux.just(new ResponseData(url, 200, supplyNumber().get(), timestamp)));
-            averageDataCalculatorService.calculateMovingAverageForWindowSize(windowSize, url);
+            averageDataCalculatorService.calculateMovingAverageForWindowSize(windowSize, windowSize, url);
         }
 
         verify(averageRepository, times(1)).existsById(10000);
