@@ -1,16 +1,17 @@
 package com.metao.monitor.monitortoolspringboot.model;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 @Getter
+@EqualsAndHashCode
 public class MovingAverageData {
 
-    private final Queue<Double> window = new ConcurrentLinkedQueue<>();
-    private AtomicReference<Double> sum = new AtomicReference<>(0.0);
+    private AtomicReference<Double> atomicSum = new AtomicReference<>(0.0);
+    private AtomicInteger offset = new AtomicInteger(0);
     private final int windowSize;
 
     public MovingAverageData(int windowSize) {
@@ -18,51 +19,19 @@ public class MovingAverageData {
         this.windowSize = windowSize;
     }
 
-    public void saveResponseTime(double responseTime) {
-        window.offer(responseTime);
-        updateSum(responseTime);
+    public void increaseOffset() {
+        offset.incrementAndGet();
     }
-
-    private void updateSum(double responseTime) {
-        sum.lazySet(sum.getOpaque() + responseTime);
-        if (window.size() > windowSize) {
-            sum.set(getSum() - window.poll());
-        }
+    
+    public void updateSum(double sum) {
+        atomicSum.lazySet(sum);
     }
 
     public double getSum() {
-        return sum.getOpaque();
+        return atomicSum.getOpaque();
     }
 
-    public double getAverage(int windowSum) {
-        assert windowSum > 0 : "Window size must be greater than 0";
-        if(window.isEmpty()) {
-            return 0.0;
-        }
-        return getSum() / windowSum;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        MovingAverageData other = (MovingAverageData) obj;
-        if (windowSize != other.windowSize) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        return prime + windowSize;
+    public double getAverage() {
+        return getSum() / windowSize;
     }
 }

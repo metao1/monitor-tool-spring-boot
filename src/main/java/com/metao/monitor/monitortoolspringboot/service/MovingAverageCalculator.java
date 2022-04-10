@@ -4,6 +4,6 @@ public interface MovingAverageCalculator {
 
     public double getAverage(int windowSize);
 
-    public void updateAverage(long responseTime);
+    public double updateSum(double sum, int windowSize);
 
 }

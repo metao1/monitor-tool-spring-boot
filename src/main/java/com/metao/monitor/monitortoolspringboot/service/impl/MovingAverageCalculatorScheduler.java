@@ -1,11 +1,9 @@
 package com.metao.monitor.monitortoolspringboot.service.impl;
 
 import java.time.Duration;
-import java.time.Instant;
 
+import com.metao.monitor.monitortoolspringboot.config.MovingAverageConfig;
 import com.metao.monitor.monitortoolspringboot.model.AverageViewModel;
-import com.metao.monitor.monitortoolspringboot.repository.AverageViewRepository;
-import com.metao.monitor.monitortoolspringboot.repository.MovingAverageRepository;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
@@ -23,12 +21,12 @@ import reactor.core.publisher.Mono;
 public class MovingAverageCalculatorScheduler {
 
     private static final int TIMEOUT = 200;// 200 ms
-    private final MovingAverageRepository averageRepository;
-    private final AverageViewRepository viewRepository;
+    private final MovingAverageCalculatorService movingAverageCalculatorService;
+    private final MovingAverageConfig config;
 
     @Scheduled(fixedDelay = 10 * 1000, initialDelay = 10 * 1000) // every 10 seconds by default
     public void runTenSecondAverageCalculator() {
-        saveMovingAverageCalculator(10)
+        calculateMovingAverageForWindowSize(10)
                 .timeout(Duration.ofMillis(TIMEOUT))
                 .onErrorContinue(this::reportError)
                 .subscribe();
@@ -36,7 +34,7 @@ public class MovingAverageCalculatorScheduler {
 
     @Scheduled(fixedDelay = 60 * 1000, initialDelay = 60 * 1000) // every 60 seconds by default
     public void runOneMinuteAverageCalculator() {
-        saveMovingAverageCalculator(60)
+        calculateMovingAverageForWindowSize(60)
                 .timeout(Duration.ofMillis(TIMEOUT))
                 .onErrorContinue(this::reportError)
                 .subscribe();
@@ -44,20 +42,18 @@ public class MovingAverageCalculatorScheduler {
 
     @Scheduled(fixedDelay = 3600 * 1000, initialDelay = 3600 * 1000) // every 3600 seconds by default
     public void runOneHourAverageCalculator() {
-        saveMovingAverageCalculator(3600)
+        calculateMovingAverageForWindowSize(3600)
                 .timeout(Duration.ofMillis(TIMEOUT))
                 .onErrorContinue(this::reportError)
                 .subscribe();
     }
 
     @Async
-    private Mono<AverageViewModel> saveMovingAverageCalculator(int windowSize) {
-        if (averageRepository.existsById(windowSize)) {
-            var movingAverage = averageRepository.findById(windowSize);
-            var average = movingAverage.getAverage(windowSize);
-            return viewRepository.save(new AverageViewModel(Instant.now().toEpochMilli(), windowSize, average));
-        }
-        return Mono.empty();
+    private Mono<AverageViewModel> calculateMovingAverageForWindowSize(int windowSize) {
+        assert config != null;
+        assert windowSize > 0 : "window size must be greater than 0";
+        return movingAverageCalculatorService.calculateMovingAverageForWindowSize(windowSize, config.getUrl());
+
     }
 
     private void reportError(Throwable throwable, Object object2) {

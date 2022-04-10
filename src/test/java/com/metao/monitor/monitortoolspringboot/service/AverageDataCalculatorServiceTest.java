@@ -43,7 +43,8 @@ public class AverageDataCalculatorServiceTest {
         Flux.range(1, 3600)
                 .map(i -> new ResponseData(1 + "", 200, supplyNumber().get(), Instant.now().toEpochMilli()))
                 .map(ResponseData::getResponseTime)
-                .subscribe(averageDataCalculatorService::updateAverage);
+                .reduce(0d, (a, b) -> a + b)
+                .subscribe(sum -> averageDataCalculatorService.updateSum(sum, windowSizes.get(0)));
 
         verify(averageRepository, times(3600)).existsById(10000);
         verify(averageRepository, times(3600)).existsById(20000);
@@ -61,7 +62,8 @@ public class AverageDataCalculatorServiceTest {
         Flux.range(1, 10) // 9 times in total
                 .map(i -> new ResponseData(1 + "", 200, supplyNumber().get(), Instant.now().toEpochMilli()))
                 .map(ResponseData::getResponseTime)
-                .subscribe(averageDataCalculatorService::updateAverage);
+                .reduce(0d, (a, b) -> a + b)
+                .subscribe(sum -> averageDataCalculatorService.updateSum(sum, windowSizes.get(0)));
 
         assertEquals(20d, averageDataCalculatorService.getAverage(10));
 

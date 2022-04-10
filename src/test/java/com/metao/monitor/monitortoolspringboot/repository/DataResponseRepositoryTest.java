@@ -17,52 +17,52 @@ import reactor.test.StepVerifier;
 @DataR2dbcTest
 public class DataResponseRepositoryTest {
 
-    @Autowired
-    DataResponseRepositroy repository;
+        @Autowired
+        DataResponseRepositroy repository;
 
-    @Autowired
-    R2dbcEntityTemplate template;
+        @Autowired
+        R2dbcEntityTemplate template;
 
-    @BeforeEach
-    public void setup() {
-        this.template.delete(ResponseData.class).all().block(Duration.ofSeconds(5));
-    }
+        @BeforeEach
+        public void setup() {
+                this.template.delete(ResponseData.class).all().block(Duration.ofSeconds(5));
+        }
 
-    @Test
-    void testFindAll() {
-        var data = IntStream.range(1, 101)
-                .mapToObj(
-                        i -> new ResponseData("http://httpstat.us/200", 200, 10, Instant.now().toEpochMilli()))
-                .toList();
-        repository.saveAll(data)
-                .log()
-                .then()
-                .thenMany(this.repository.findByUrlContains("%httpstat%"))
-                .log()
-                .as(StepVerifier::create)
-                .expectNextCount(100)
-                .verifyComplete();
-    }
+        @Test
+        void testFindAll() {
+                var data = IntStream.range(1, 101)
+                                .mapToObj(i -> new ResponseData("http://httpstat.us/200", 200, 10,
+                                                Instant.now().toEpochMilli()))
+                                .toList();
+                repository.saveAll(data)
+                                .log()
+                                .then()
+                                .thenMany(this.repository.findByUrl("%httpstat%", 10, 0))
+                                .log()
+                                .as(StepVerifier::create)
+                                .expectNextCount(100)
+                                .verifyComplete();
+        }
 
-    @Test
-    void testFindByUrlContains() {
-        var data = IntStream.rangeClosed(1, 10)
-                .mapToObj(
-                        i -> new ResponseData("http://httpstat.us/200", 200, 10, Instant.now().toEpochMilli()))
-                .toList();
+        @Test
+        void testFindByUrlContains() {
+                var data = IntStream.rangeClosed(1, 10)
+                                .mapToObj(i -> new ResponseData("http://httpstat.us/200", 200, 10,
+                                                Instant.now().toEpochMilli()))
+                                .toList();
 
-        var many = repository.saveAll(data);
+                var many = repository.saveAll(data);
 
-        many.then()
-                .thenMany(this.repository.findAllWithLimit(1))
-                .as(StepVerifier::create)
-                .expectNextCount(1)
-                .verifyComplete();
+                many.then()
+                                .thenMany(this.repository.findAllWithLimit(1))
+                                .as(StepVerifier::create)
+                                .expectNextCount(1)
+                                .verifyComplete();
 
-        many.then()
-                .thenMany(this.repository.findAllWithLimit(10))
-                .as(StepVerifier::create)
-                .expectNextCount(10)
-                .verifyComplete();
-    }
+                many.then()
+                                .thenMany(this.repository.findAllWithLimit(10))
+                                .as(StepVerifier::create)
+                                .expectNextCount(10)
+                                .verifyComplete();
+        }
 }

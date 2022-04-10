@@ -11,6 +11,6 @@ import reactor.core.publisher.Flux;
 @Repository
 public interface AverageViewRepository extends R2dbcRepository<AverageViewModel, Long> {
 
-    @Query("select * from average_view where window_size = :windowSize")
+    @Query("select * from average_view_model where window_size like :windowSize")
     public Flux<AverageViewModel> findByWindowSize(int windowSize);
 }
