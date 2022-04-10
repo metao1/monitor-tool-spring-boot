@@ -12,6 +12,6 @@ public class AverageViewModelConverter implements AverageViewModelMapper<Average
     @Override
     public AverageViewModelDTO toDto(AverageViewModel averageViewModel) {
         return new AverageViewModelDTO(averageViewModel.getWindowSize(),
-                averageViewModel.getMovingAverageResponseTime(), averageViewModel.getId());
+                averageViewModel.getMovingAverageResponseTime(), averageViewModel.getTimestamp());
     }
 }
