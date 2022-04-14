@@ -31,6 +31,6 @@ public class AverageResponseTimeController {
         return repository
                 .findByWindowSize(windowSize)
                 .filter(Objects::nonNull)
-                .map(averageData -> converter.toDto(averageData));
+                .map(converter::toDto);
     }
 }

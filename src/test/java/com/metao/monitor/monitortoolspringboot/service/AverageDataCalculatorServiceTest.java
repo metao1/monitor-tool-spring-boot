@@ -59,9 +59,9 @@ public class AverageDataCalculatorServiceTest {
             averageDataCalculatorService.calculateMovingAverageForWindowSize(windowSize, windowSize, url);
         }
 
-        verify(averageRepository, times(1)).existsById(10000);
-        verify(averageRepository, times(1)).existsById(20000);
-        verify(averageRepository, times(1)).existsById(40000);
+        verify(averageRepository, times(2)).existsById(10000);
+        verify(averageRepository, times(2)).existsById(20000);
+        verify(averageRepository, times(2)).existsById(40000);
     }
 
     private static Supplier<Long> supplyNumber() {
