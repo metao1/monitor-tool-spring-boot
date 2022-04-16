@@ -52,7 +52,7 @@ public class MovingAverageCalculatorService implements MovingAverageCalculator {
         return dataResponseRepository.findByUrl(url, windowSize + getOffset(windowSize), getOffset(windowSize)) // query response times for the given url
                 .filter(Objects::nonNull) // filter out null response times
                 .map(ResponseData::getResponseTime) // get response times
-                .reduce(0d, (a, b) -> a + b) // sum response times
+                .reduce(0d, (a, b) -> a + b) // sum response times                
                 .map(sum -> sum / windowSize) // calculate average
                 .flatMap(average -> {
                     var averageViewModel = new AverageViewModel(Instant.now().toEpochMilli(), windowSize, average); // create average view model

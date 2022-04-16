@@ -1,5 +1,6 @@
 package com.metao.monitor.monitortoolspringboot.controller;
 
+import java.time.Duration;
 import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
@@ -16,21 +17,24 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/average")
 public class AverageResponseTimeController {
 
+    private static final long TIMEOUT = 200;
     private final AverageViewRepository repository;
     private final AverageViewModelConverter converter;
 
     @GetMapping
     @ResponseBody
     public Flux<AverageViewModelDTO> getAverage(@RequestParam("window_size") @NotNull int windowSize) {
-        return repository
-                .findByWindowSize(windowSize)
+        return repository.findByWindowSize(windowSize)                
                 .filter(Objects::nonNull)
-                .map(converter::toDto);
+                .map(converter::toDto)
+                .timeout(Duration.ofMillis(TIMEOUT))
+                .subscribeOn(Schedulers.boundedElastic());
     }
 }

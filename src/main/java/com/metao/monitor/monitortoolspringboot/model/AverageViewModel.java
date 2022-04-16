@@ -2,6 +2,8 @@ package com.metao.monitor.monitortoolspringboot.model;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.NotBlank;
+
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -15,12 +17,15 @@ import lombok.Setter;
 @Table(value = "average_view_model")
 public class AverageViewModel implements Serializable {
 
+    @NotBlank
     @Column("id")
     private Long timestamp; // primary key timesatmp
 
+    @NotBlank
     @Column("window_size")
     private int windowSize;
 
+    @NotBlank
     @Column("moving_average_response_time")
     private double movingAverageResponseTime;
 
