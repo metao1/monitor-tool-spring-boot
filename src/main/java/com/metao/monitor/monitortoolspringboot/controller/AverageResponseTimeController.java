@@ -27,7 +27,7 @@ public class AverageResponseTimeController {
     private static final long TIMEOUT = 200;
     private final AverageViewRepository repository;
     private final AverageViewModelConverter converter;
-
+        
     @GetMapping
     @ResponseBody
     public Flux<AverageViewModelDTO> getAverage(@RequestParam("window_size") @NotNull int windowSize) {
